@@ -3,18 +3,22 @@
 ## Overview
 PHP library that wraps the
 [nagioseasier][https://github.com/wfarr/nagioseasier-module] query handler for
-nagios4
+nagios4.
 
 ## Usage
 ```
-Nagioseasier::status($hostname or $service);
-Nagioseasier::check($hostname or $service);
-Nagioseasier::enable_notifications($hostname or $service);
-Nagioseasier::disable_notifications($hostname or $service);
-Nagioseasier::acknowledge($hostname or $service, [$comment]);
-Nagioseasier::unacknowledge($hostname or $service);
-Nagioseasier::downtime($hostname or $service, [$minutes, $comment]);
-Nagioseasier::problems($hostgroup or $servicegroup, [$state]);
+<?php
+
+require "nagioseasier.php";
+
+$details = Nagioseasier::status($hostname or $service);
+$details = Nagioseasier::check($hostname or $service);
+$details = Nagioseasier::enable_notifications($hostname or $service);
+$details = Nagioseasier::disable_notifications($hostname or $service);
+$details = Nagioseasier::acknowledge($hostname or $service, [$comment]);
+$details = Nagioseasier::unacknowledge($hostname or $service);
+$details = Nagioseasier::downtime($hostname or $service, [$minutes, $comment]);
+$details = Nagioseasier::problems($hostgroup or $servicegroup, [$state]);
 ```
 
 ## Installation
