@@ -25,8 +25,6 @@ class Nagioseasier {
 
         if ($details["error"] == true) {
             return $details;
-        } elseif (strpos($details["details"], "NO HOST OR SERVICE") !== false) {
-            return ["error" => true, "details" => $details["details"]];
         } else {
             $detailarray = explode(";", $details["details"]);
             return [ "error" => false,
@@ -73,12 +71,26 @@ class Nagioseasier {
         } else {
             fwrite($fp, "#nagioseasier $cmd\0");
             $ret = "";
+            $errors = false;
             while (!feof($fp)) {
-                $ret .= fgets($fp, 1024);
+                $msg = fgets($fp, 1024);
+                switch (trim($msg)) {
+                case "200: OK":
+                    break;
+                case "404: Not found":
+                    $errors = true;
+                    break;
+                default:
+                    $ret .= $msg;
+                }
             }
             fclose($fp);
 
-            return ["error" => false, "details" => $ret];
+            if ($errors == true) {
+                return ["error" => $errors, "details" => $ret];
+            } else {
+                return ["error" => false, "details" => $ret];
+            }
 
         }
     }
