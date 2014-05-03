@@ -21,12 +21,14 @@ class Nagioseasier {
      *   ["error" => true, "details" => "details"
      */
     static function status($target) {
-        $details = send_command("status $target");
+        $details = Nagioseasier::send_command("status $target");
 
         if ($details["error"] == true) {
             return $details;
+        } elseif (strpos($details["details"], "NO HOST OR SERVICE") !== false) {
+            return ["error" => true, "details" => $details["details"]];
         } else {
-            $detailarray = explode(";", $details);
+            $detailarray = explode(";", $details["details"]);
             return [ "error" => false,
                      "target" => array_shift($detailarray),
                      "state" => array_shift($detailarray),
