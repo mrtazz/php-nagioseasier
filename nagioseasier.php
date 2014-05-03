@@ -60,25 +60,154 @@ class Nagioseasier {
         }
     }
 
+    /**
+     * check the status of a host or service
+     *
+     * Parameters:
+     *   $target - hostname or hostname/service
+     *
+     * Returns an array of either
+     *   ["error" = false, "details" => "details"]
+     *
+     *   or
+     *
+     *   ["error" => true, "details" => "details"]
+     */
     static function check($target) {
+        return Nagioseasier::send_command("check $target");
     }
 
+    /**
+     * enable notifications of a host or service
+     *
+     * Parameters:
+     *   $target - hostname or hostname/service
+     *
+     * Returns an array of either
+     *   ["error" = false, "details" => "details"]
+     *
+     *   or
+     *
+     *   ["error" => true, "details" => "details"]
+     */
     static function enable_notifications($target) {
+        return Nagioseasier::send_command("enable_notifications $target");
     }
 
+    /**
+     * disable notifications of a host or service
+     *
+     * Parameters:
+     *   $target - hostname or hostname/service
+     *
+     * Returns an array of either
+     *   ["error" = false, "details" => "details"]
+     *
+     *   or
+     *
+     *   ["error" => true, "details" => "details"]
+     */
     static function disable_notifications($target) {
+        return Nagioseasier::send_command("disable_notifications $target");
     }
 
+    /**
+     * acknowledge a problem of a host or service
+     *
+     * Parameters:
+     *   $target - hostname or hostname/service
+     *   $comment - comment for action
+     *
+     * Returns an array of either
+     *   ["error" = false, "details" => "details"]
+     *
+     *   or
+     *
+     *   ["error" => true, "details" => "details"]
+     */
     static function acknowledge($target, $comment = "") {
+        return Nagioseasier::send_command("acknowledge $target $comment");
     }
 
+    /**
+     * remove acknowledgement of a problem for a host or service
+     *
+     * Parameters:
+     *   $target - hostname or hostname/service
+     *
+     * Returns an array of either
+     *   ["error" = false, "details" => "details"]
+     *
+     *   or
+     *
+     *   ["error" => true, "details" => "details"]
+     */
     static function unacknowledge($target) {
+        return Nagioseasier::send_command("unacknowledge $target");
     }
 
+    /**
+     * schedule downtime of a host or service
+     *
+     * Parameters:
+     *   $target  - hostname or hostname/service
+     *   $minutes - minutes of downtime to set
+     *   $comment - comment for action
+     *
+     * Returns an array of either
+     *   ["error" = false, "details" => "details"]
+     *
+     *   or
+     *
+     *   ["error" => true, "details" => "details"]
+     */
     static function downtime($target, $minutes=60, $comment="") {
+        return Nagioseasier::send_command("status $target");
     }
 
-    static function problems($targetgroup, $state=null) {
+    /**
+     * get the status of a host or service
+     *
+     * Parameters:
+     *   $target - hostname or hostname/service
+     *
+     * Returns an array of either
+     *   ["error" = false, "target" => "target", "status" => "status",
+     *   "details" => "details"]
+     *
+     *   or
+     *
+     *   ["error" => true, "details" => "details"]
+     */
+    static function problems($targetgroup=null, $state=null) {
+        if (!empty($targetgroup)) {
+            $targetgroup = " $targetgroup";
+        }
+        if (!empty($state)) {
+            $state = " $state";
+        }
+        $details = Nagioseasier::send_command("problems$targetgroup$state");
+
+        if ($details["error"] == true) {
+            return $details;
+        } else {
+            $services = [];
+            foreach(explode("\n", $details["details"]) as $detail) {
+                if (empty($detail)) {
+                    continue;
+                }
+                $detailarray = explode(";", $detail);
+                $services[] =  [
+                        "target" => array_shift($detailarray),
+                        "state" => array_shift($detailarray),
+                        "details" => explode("\n", trim(implode(";",$detailarray)))
+                    ];
+            }
+            return [ "error" => false,
+                    "target" => $target,
+                    "details" => $services
+                    ];
+        }
     }
 
     /**
