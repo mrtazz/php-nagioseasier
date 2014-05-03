@@ -2,10 +2,12 @@
 
 ## Overview
 PHP library that wraps the
-[nagioseasier][https://github.com/wfarr/nagioseasier-module] query handler for
+[nagioseasier](https://github.com/wfarr/nagioseasier-module) query handler for
 nagios4.
 
 ## Usage
+Simply include the file and call the functions:
+
 ```
 <?php
 
@@ -18,7 +20,7 @@ $details = Nagioseasier::disable_notifications($hostname or $service);
 $details = Nagioseasier::acknowledge($hostname or $service, [$comment]);
 $details = Nagioseasier::unacknowledge($hostname or $service);
 $details = Nagioseasier::downtime($hostname or $service, [$minutes, $comment]);
-$details = Nagioseasier::problems($hostgroup or $servicegroup, [$state]);
+$details = Nagioseasier::problems([$hostgroup or $servicegroup], [$state]);
 ```
 
 ## Installation
