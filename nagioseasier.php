@@ -18,7 +18,7 @@ class Nagioseasier {
      *
      *   or
      *
-     *   ["error" => true, "details" => "details"
+     *   ["error" => true, "details" => "details"]
      */
     static function status($target) {
         $details = Nagioseasier::send_command("status $target");
@@ -26,12 +26,37 @@ class Nagioseasier {
         if ($details["error"] == true) {
             return $details;
         } else {
-            $detailarray = explode(";", $details["details"]);
-            return [ "error" => false,
-                     "target" => array_shift($detailarray),
-                     "state" => array_shift($detailarray),
-                     "details" => implode(";",$detailarray)
-                     ];
+            if (strpos($target, "/") !== false) {
+                // we have a service check
+                $detailarray = explode(";", $details["details"]);
+                return [ "error" => false,
+                        "target" => array_shift($detailarray),
+                        "state" => array_shift($detailarray),
+                        "details" => explode("\n", trim(implode(";",$detailarray)))
+                        ];
+            } else {
+                $services = [];
+                $status = "OK";
+                foreach(explode("\n", $details["details"]) as $detail) {
+                    if (empty($detail)) {
+                        continue;
+                    }
+                    $detailarray = explode(";", $detail);
+                    if (strtolower($detailarray[0]) == strtolower("$target/ping")) {
+                        $status = $detailarray[1];
+                    }
+                    $services[] =  [
+                            "target" => array_shift($detailarray),
+                            "state" => array_shift($detailarray),
+                            "details" => explode("\n", trim(implode(";",$detailarray)))
+                        ];
+                }
+                return [ "error" => false,
+                        "target" => $target,
+                        "state" => $status,
+                        "details" => $services
+                        ];
+            }
         }
     }
 
